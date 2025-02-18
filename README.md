@@ -36,8 +36,8 @@ To run the project locally, follow these steps:
 
 ### Clone the Repository
 
-git clone https://github.com/syedmujtaba-10/attention-viz
-cd attention-viz
+git clone https://github.com/syedmujtaba-10/Attention-Viz
+cd Attention-Viz
 
 ### Install Dependencies
 Make sure you have Python >=3.8 installed. Then run:
