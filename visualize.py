@@ -15,6 +15,7 @@ def plot_interactive_attention(attention, tokens, layer=0, head=0):
     attn_weights = attention[layer][0, head].detach().numpy()
     df = pd.DataFrame(attn_weights, index=tokens, columns=tokens)
 
+    fig, ax = plt.subplots(figsize=(6, 3))
     fig = px.imshow(df, labels=dict(x="Token", y="Token", color="Attention"))
     return fig
 
@@ -29,6 +30,7 @@ def plot_attention_heatmap(attention, tokens, layer=0, head=0):
     df = pd.DataFrame(attn_weights, index=tokens, columns=tokens)
 
     # Generate the heatmap using Plotly
+    fig, ax = plt.subplots(figsize=(6, 3))
     fig = px.imshow(df, labels=dict(x="Token", y="Token", color="Attention"),
                     x=tokens, y=tokens, color_continuous_scale="Blues")
 
@@ -93,6 +95,7 @@ def plot_attention_graph(attention, tokens, layer=0, head=0):
         marker=dict(size=10, color="red")
     )
 
+    fig, ax = plt.subplots(figsize=(6, 3))
     fig = go.Figure(data=[edge_trace, node_trace])
     fig.update_layout(title=f"Attention Graph (Layer {layer}, Head {head})", showlegend=False)
     return fig
@@ -113,7 +116,7 @@ def plot_attention_wordcloud(attention, tokens, layer=0, head=0):
 
     # Convert Matplotlib word cloud to image
     img_buffer = BytesIO()
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(6, 3))
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
     plt.savefig(img_buffer, format="png", bbox_inches="tight")
@@ -133,7 +136,7 @@ def plot_attention_arcs(attention, tokens, layer=0, head=0):
     """Visualizes attention as an arc diagram and returns a Plotly figure."""
     attn_weights = attention[layer][0, head].detach().numpy()
     
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(6, 3))
     ax.set_xlim(0, len(tokens) - 1)
     ax.set_ylim(0, 2)
     
@@ -169,8 +172,6 @@ def plot_attention_arcs(attention, tokens, layer=0, head=0):
 
 
 
-import streamlit as st
-
 def highlight_attention(text, attention, tokens, layer=0, head=0):
     """Highlights tokens based on attention strength."""
     attn_weights = attention[layer][0, head].detach().numpy()
@@ -186,83 +187,138 @@ def highlight_attention(text, attention, tokens, layer=0, head=0):
         f'<span style="background-color: rgba(255, 0, 0, {normalized_attn[i]}); padding:2px 4px; border-radius:4px;">{tokens[i]}</span>'
         for i in range(len(tokens))
     )
+    print(attention[layer][0, head].detach().numpy())
+    print(tokens)
     
     return f"<p style='font-size:18px;'>{highlighted_text}</p>"
 
 
 
-def plot_attention_trend(attention, tokens, head=0):
-    """Plots attention strength across all layers for a given head."""
-    avg_attn_per_layer = [np.mean(layer[0, head].detach().numpy()) for layer in attention]
-    layers = list(range(len(attention)))
+def plot_attention_trend(
+    attention, 
+    tokens, 
+    head=0, 
+    special_tokens={"[CLS]", "[SEP]", ".", ",", "or"}, 
+    direction="to"
+):
+    """
+    Plots how much each special token is attended to or attends outward across all layers
+    for a given head.
 
+    Parameters:
+    -----------
+    attention : list of torch.Tensor
+        A list of attention tensors across layers. Each element has shape:
+        (1, num_heads, seq_len, seq_len)
+    tokens : list of str
+        The tokenized text from the model (including special tokens).
+    head : int
+        The specific attention head to examine.
+    special_tokens : set of str
+        Which tokens to track in the plot. Adjust for each model if needed.
+    direction : str
+        - "to"   => measure how much each token is *attended to* by the rest of the sequence
+        - "from" => measure how much each token *attends outward* to the rest of the sequence
+    """
+    data = []
+    num_layers = len(attention)
+
+    for layer_idx in range(num_layers):
+        # attn_weights shape after removing batch dimension => (num_heads, seq_len, seq_len)
+        attn_weights = attention[layer_idx][0].detach().numpy()  
+        # Extract the head we care about
+        head_matrix = attn_weights[head]  # shape: (seq_len, seq_len)
+
+        # For each token in the sequence
+        for i, token_str in enumerate(tokens):
+            if token_str in special_tokens:
+                if direction == "to":
+                    # How much token i is attended to by others => average over the query dimension
+                    # i.e., mean of head_matrix[:, i]
+                    value = np.mean(head_matrix[:, i])
+                else:
+                    # direction == "from"
+                    # How much token i attends outward => average over the key dimension
+                    # i.e., mean of head_matrix[i, :]
+                    value = np.mean(head_matrix[i, :])
+
+                data.append({
+                    "Layer": layer_idx + 1,   # 1-based indexing for readability
+                    "Token": token_str,
+                    "Attention": value
+                })
+
+    # Convert to DataFrame for plotting
+    df = pd.DataFrame(data)
+
+    # Create a Plotly figure
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=layers, y=avg_attn_per_layer, mode="lines+markers", name="Attention Strength"))
 
-    fig.update_layout(title="Attention Strength Across Layers",
-                      xaxis_title="Layer",
-                      yaxis_title="Average Attention Weight",
-                      template="plotly_dark")
+    # Plot one line per special token
+    for token_name in df["Token"].unique():
+        subset = df[df["Token"] == token_name]
+        fig.add_trace(go.Scatter(
+            x=subset["Layer"],
+            y=subset["Attention"],
+            mode="lines+markers",
+            name=token_name
+        ))
+
+    direction_label = "Attended To" if direction == "to" else "Attends Outward"
+    fig.update_layout(
+        title=f"Attention Trend Across Layers (Head {head}, {direction_label})",
+        xaxis_title="Layer",
+        yaxis_title="Average Attention",
+        template="plotly_dark"
+    )
 
     return fig
 
 
-import shap
-import numpy as np
-import matplotlib.pyplot as plt
-import streamlit as st
-from io import BytesIO
-import PIL.Image
-import torch
 
-def explain_attention_with_shap(model, tokenizer, text):
-    """Computes SHAP explanations for transformer attention and returns a summary plot image."""
 
-    # Ensure input text is wrapped in a list (SHAP sometimes passes numpy arrays)
-    if isinstance(text, np.ndarray):
-        text = text.tolist()  # Convert NumPy array to Python list
-    if isinstance(text, str):
-        text = [text]  # Ensure single text input is a list
+"""def plot_attention_by_layer(attention, tokens):
+    
+    #Plots how much each special token is attended to across layers.
+    #Specifically, for each token j, we compute average attention from
+    #all heads and all query positions to j.
+    #
+    layers = len(attention)  # e.g. 12 for BERT Base
+    data = []
 
-    # Define function for SHAP to explain
-    def model_forward(text_list):
-        """Tokenizes text, converts to tensor, and gets model output."""
-        if isinstance(text_list, np.ndarray):
-            text_list = text_list.tolist()  # Convert NumPy array to Python list
-        elif isinstance(text_list, str):
-            text_list = [text_list]  # Ensure text is wrapped in a list
+    # Adjust these special tokens if you use GPT-2 or RoBERTa
+    special_tokens = {"[CLS]", "[SEP]", ".", ",", "or"}
 
-        # Tokenize input correctly
-        tokenized_inputs = tokenizer(text_list, return_tensors="pt", padding=True, truncation=True)
-        input_ids = tokenized_inputs["input_ids"]
-        attention_mask = tokenized_inputs["attention_mask"]
+    for layer in range(layers):
+        # attn_weights shape: (num_heads, query_seq_len, key_seq_len)
+        attn_weights = attention[layer][0].detach().numpy()
 
-        with torch.no_grad():  # Disable gradient computation for inference
-            output = model(input_ids, attention_mask=attention_mask)
-        
-        # Extract meaningful output (last hidden state or attention weights)
-        if hasattr(output, "last_hidden_state"):
-            return output.last_hidden_state[:, 0, :].cpu().numpy()  # Extract CLS token representation
-        elif hasattr(output, "attentions"):
-            return torch.mean(output.attentions[-1], dim=1).cpu().numpy()  # Extract average attention
-        else:
-            raise ValueError("Model output does not contain `last_hidden_state` or `attentions`.")
+        # 1) Average over heads (axis=0)
+        # 2) Average over query positions (axis=1)
+        # => shape: (key_seq_len,)
+        avg_attn_to = np.mean(attn_weights, axis=(0, 1))
 
-    # Define SHAP explainer (now properly handling text input)
-    explainer = shap.Explainer(model_forward, masker=shap.maskers.Text(tokenizer))
+        for i, token in enumerate(tokens):
+            token_str = str(token)
+            if token_str in special_tokens:
+                data.append({
+                    "Layer": layer + 1,
+                    "Token": token_str,
+                    "Attention": avg_attn_to[i]
+                })
 
-    # Compute SHAP values
-    shap_values = explainer(text)
+    # Convert to DataFrame
+    df = pd.DataFrame(data)
 
-    # Create SHAP summary plot
-    fig, ax = plt.subplots(figsize=(10, 5))
-    shap.plots.text(shap_values, display=False)
-    plt.title("SHAP Explanation for Attention")
+    # Plot using Seaborn
+    fig, ax = plt.subplots(figsize=(6, 4))
+    sns.scatterplot(data=df, x="Layer", y="Attention", hue="Token", style="Token", ax=ax)
+    sns.lineplot(data=df, x="Layer", y="Attention", hue="Token", ax=ax, legend=False)
 
-    # Convert Matplotlib figure to an image for Streamlit
-    img_buffer = BytesIO()
-    plt.savefig(img_buffer, format="png", bbox_inches="tight")
-    plt.close()
+    plt.xlabel("Layer")
+    plt.ylabel("Avg. Attention (Token is Attended To)")
+    plt.title("Attention Scores Across Layers (Attended-To Metric)")
+    plt.xticks(range(1, layers + 1))
+    plt.grid(True)
 
-    img = PIL.Image.open(img_buffer)
-    return img
+    return fig"""
