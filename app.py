@@ -8,7 +8,7 @@ from visualize import (
     plot_attention_arcs,
     highlight_attention,
     plot_attention_trend,
-    explain_attention_with_shap
+
 )
 
 st.title("🧠 Compare Attention Across Transformer Models")
@@ -40,6 +40,7 @@ if st.button("Compare Models"):
 
         # Show attention-highlighted text for both models
         st.subheader(f"🔎 Highlighted Attention in Text (Layer {layer}, Head {head})")
+        st.caption("Highlights tokens based on attention strength")
         col1, col2 = st.columns(2)
         with col1:
             st.markdown(f"**{model1}**", unsafe_allow_html=True)
@@ -64,6 +65,10 @@ if st.button("Compare Models"):
             st.plotly_chart(fig2)
 
         # Show attention word clouds
+        
+        st.subheader("Word Cloud")
+        st.caption("Generates a word cloud where size represents attention importance")
+
         col1, col2 = st.columns(2)
         with col1:
             st.subheader(f"📌 {model1} Word Cloud")
@@ -76,6 +81,8 @@ if st.button("Compare Models"):
             st.plotly_chart(fig4)
 
         # Show interactive attention graphs
+        st.subheader("Attention Graph")
+        st.caption("Creates a force-directed graph of attention weights")
         col1, col2 = st.columns(2)
         with col1:
             st.subheader(f"🔗 {model1} Attention Graph")
@@ -88,6 +95,8 @@ if st.button("Compare Models"):
             st.plotly_chart(fig6)
 
         # Show attention arc diagrams
+        st.subheader("Attention Arc Diagram")
+        st.caption("Visualizes attention as an arc diagram and returns a Plotly figure")
         col1, col2 = st.columns(2)
         with col1:
             st.subheader(f"🌀 {model1} Attention Arc Diagram")
@@ -100,7 +109,8 @@ if st.button("Compare Models"):
             st.plotly_chart(fig8)
 
         # Show Attention Trends Over Layers
-        st.subheader("📈 Attention Trend Over Layers")
+        st.subheader("📈 Attention Trend for Special Tokens")
+        st.caption("Plots how much each special token is attended to or attends outward across all layers for a given head.")
         col1, col2 = st.columns(2)
 
         with col1:
@@ -112,4 +122,3 @@ if st.button("Compare Models"):
             st.subheader(f"📊 {model2} Attention Trend")
             fig10 = plot_attention_trend(attention2, tokens2, head)
             st.plotly_chart(fig10)
-
