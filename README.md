@@ -36,7 +36,7 @@ To run the project locally, follow these steps:
 
 ### Clone the Repository
 
-git clone https://github.com/syedmujtaba-10/Attention-Viz
+git clone https://github.com/syedmujtaba-10/Attention_Viz
 cd Attention-Viz
 
 ### Install Dependencies
