@@ -21,7 +21,6 @@ Users can:
 ✅ **Word Cloud:** Visualize important tokens based on attention strength.  
 ✅ **Attention Arcs:** Explore long-range dependencies in sentences.  
 ✅ **Interactive Graphs:** Create force-directed attention graphs.  
-✅ **SHAP Interpretability:** Use SHAP values to understand model decisions.  
 ✅ **Layer & Head Selection:** Select specific layers and attention heads for analysis.  
 
 ---
@@ -35,16 +34,16 @@ Users can:
 ## 📦 Installation
 To run the project locally, follow these steps:
 
-### ** Clone the Repository**
+### Clone the Repository
 
 git clone https://github.com/YOUR_GITHUB_USERNAME/attention-viz
 cd attention-viz
 
-### ** Install Dependencies**
+### Install Dependencies
 Make sure you have Python >=3.8 installed. Then run:
 
 pip install -r requirements.txt
 
-### ** Run the app**
+### Run the app
 
 streamlit run app.py
