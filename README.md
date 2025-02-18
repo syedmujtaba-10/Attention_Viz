@@ -29,10 +29,6 @@ Users can:
 ## 🎥 Demo
 🚀 **Live App on Streamlit:** [Click Here](https://attentionviz.streamlit.app/)  
 
-🔬 **Example Comparison:**  
-| **BERT Base Uncased** | **BERT Large Uncased** |
-|----------------------|----------------------|
-| ![Base](./images/base_heatmap.png) | ![Large](./images/large_heatmap.png) |
 
 ---
 
@@ -46,9 +42,9 @@ cd attention-viz
 
 ### ** Install Dependencies**
 Make sure you have Python >=3.8 installed. Then run:
-
+```bash
 pip install -r requirements.txt
 
 ### ** Run the app**
-
+```bash
 streamlit run app.py
