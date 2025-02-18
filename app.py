@@ -8,7 +8,6 @@ from visualize import (
     plot_attention_arcs,
     highlight_attention,
     plot_attention_trend,
-
 )
 
 st.title("🧠 Compare Attention Across Transformer Models")
@@ -37,7 +36,6 @@ if st.button("Compare Models"):
 
         st.subheader(f"📊 Comparing {model1} vs. {model2}")
 
-
         # Show attention-highlighted text for both models
         st.subheader(f"🔎 Highlighted Attention in Text (Layer {layer}, Head {head})")
         st.caption("Highlights tokens based on attention strength")
@@ -46,7 +44,6 @@ if st.button("Compare Models"):
             st.markdown(f"**{model1}**", unsafe_allow_html=True)
             highlighted_text1 = highlight_attention(text, attention1, tokens1, layer, head)
             st.markdown(highlighted_text1, unsafe_allow_html=True)
-
         with col2:
             st.markdown(f"**{model2}**", unsafe_allow_html=True)
             highlighted_text2 = highlight_attention(text, attention2, tokens2, layer, head)
@@ -57,28 +54,24 @@ if st.button("Compare Models"):
         with col1:
             st.subheader(f"🔍 {model1} Attention Heatmap")
             fig1 = plot_attention_heatmap(attention1, tokens1, layer, head)
-            st.plotly_chart(fig1)
-
+            st.plotly_chart(fig1, use_container_width=True)
         with col2:
             st.subheader(f"🔍 {model2} Attention Heatmap")
             fig2 = plot_attention_heatmap(attention2, tokens2, layer, head)
-            st.plotly_chart(fig2)
+            st.plotly_chart(fig2, use_container_width=True)
 
         # Show attention word clouds
-        
         st.subheader("Word Cloud")
         st.caption("Generates a word cloud where size represents attention importance")
-
         col1, col2 = st.columns(2)
         with col1:
             st.subheader(f"📌 {model1} Word Cloud")
             fig3 = plot_attention_wordcloud(attention1, tokens1, layer, head)
-            st.plotly_chart(fig3)
-
+            st.plotly_chart(fig3, use_container_width=True)
         with col2:
             st.subheader(f"📌 {model2} Word Cloud")
             fig4 = plot_attention_wordcloud(attention2, tokens2, layer, head)
-            st.plotly_chart(fig4)
+            st.plotly_chart(fig4, use_container_width=True)
 
         # Show interactive attention graphs
         st.subheader("Attention Graph")
@@ -87,12 +80,11 @@ if st.button("Compare Models"):
         with col1:
             st.subheader(f"🔗 {model1} Attention Graph")
             fig5 = plot_attention_graph(attention1, tokens1, layer, head)
-            st.plotly_chart(fig5)
-
+            st.plotly_chart(fig5, use_container_width=True)
         with col2:
             st.subheader(f"🔗 {model2} Attention Graph")
             fig6 = plot_attention_graph(attention2, tokens2, layer, head)
-            st.plotly_chart(fig6)
+            st.plotly_chart(fig6, use_container_width=True)
 
         # Show attention arc diagrams
         st.subheader("Attention Arc Diagram")
@@ -101,24 +93,21 @@ if st.button("Compare Models"):
         with col1:
             st.subheader(f"🌀 {model1} Attention Arc Diagram")
             fig7 = plot_attention_arcs(attention1, tokens1, layer, head)
-            st.plotly_chart(fig7)
-
+            st.plotly_chart(fig7, use_container_width=True)
         with col2:
             st.subheader(f"🌀 {model2} Attention Arc Diagram")
             fig8 = plot_attention_arcs(attention2, tokens2, layer, head)
-            st.plotly_chart(fig8)
+            st.plotly_chart(fig8, use_container_width=True)
 
         # Show Attention Trends Over Layers
         st.subheader("📈 Attention Trend for Special Tokens")
         st.caption("Plots how much each special token is attended to or attends outward across all layers for a given head.")
         col1, col2 = st.columns(2)
-
         with col1:
             st.subheader(f"📊 {model1} Attention Trend")
             fig9 = plot_attention_trend(attention1, tokens1, head)
-            st.plotly_chart(fig9)
-
+            st.plotly_chart(fig9, use_container_width=True)
         with col2:
             st.subheader(f"📊 {model2} Attention Trend")
             fig10 = plot_attention_trend(attention2, tokens2, head)
-            st.plotly_chart(fig10)
+            st.plotly_chart(fig10, use_container_width=True)
