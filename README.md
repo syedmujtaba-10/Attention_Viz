@@ -36,15 +36,15 @@ Users can:
 To run the project locally, follow these steps:
 
 ### ** Clone the Repository**
-```bash
+
 git clone https://github.com/YOUR_GITHUB_USERNAME/attention-viz
 cd attention-viz
 
 ### ** Install Dependencies**
 Make sure you have Python >=3.8 installed. Then run:
-```bash
+
 pip install -r requirements.txt
 
 ### ** Run the app**
-```bash
+
 streamlit run app.py
