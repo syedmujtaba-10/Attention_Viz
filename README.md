@@ -2,7 +2,7 @@
 
 ![Streamlit](https://img.shields.io/badge/Made%20With-Streamlit-red?style=flat-square)
 ![Hugging Face](https://img.shields.io/badge/Powered%20By-Hugging%20Face-yellow?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
+
 
 ## 🚀 Overview
 This **Transformer Attention Visualization App** allows users to explore **how transformer models (BERT, GPT-2, RoBERTa, etc.) distribute attention across words in a sentence**.
